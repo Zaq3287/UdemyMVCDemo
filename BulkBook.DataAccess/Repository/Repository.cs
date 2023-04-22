@@ -3,6 +3,7 @@ using BulkyBook.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -19,6 +20,7 @@ namespace BulkyBook.DataAccess.Repository
         public Repository(ApplicationDBContext db)
         {
             _db = db;
+            //_db.ShoppingCarts.AsNoTracking()
             //_db.ShoppingCarts.Include(u => u.Product).Include(u => u.CoverType);
             dbSet = _db.Set<T>();
         }
@@ -47,9 +49,18 @@ namespace BulkyBook.DataAccess.Repository
         }
 
         //includeProp - "Category, CoverType"
-        public T GetFirstOrDefault(Expression<Func<T, bool>> filter, string? includeProperties = null)
+        public T GetFirstOrDefault(Expression<Func<T, bool>> filter, string? includeProperties = null, bool tracked = true)
         {
-            IQueryable<T> query = dbSet;
+            IQueryable<T> query;
+            
+            if (tracked)
+            {
+                query = dbSet;
+            }
+            else
+            {
+                query = dbSet.AsNoTracking();
+            }
 
             query = query.Where(filter);
 
